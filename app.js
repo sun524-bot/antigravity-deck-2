@@ -595,7 +595,7 @@ if (fileUploadInput) {
     const files = fileUploadInput.files;
     if (!files || files.length === 0) return;
 
-    showToast(`📤 Sending ${files.length} file(s) to Desktop...`);
+    showToast(`📤 Sending ${files.length} file(s) to project...`);
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append('file', files[i]);
@@ -608,7 +608,7 @@ if (fileUploadInput) {
       });
       const data = await res.json();
       if (data.status === 'success') {
-        showToast(`✅ Saved ${data.files.length} file(s) to PC Desktop!`);
+        showToast(`✅ Saved ${data.files.length} file(s) to Received_Files!`);
         if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
         modalFiles.classList.add('hidden');
       } else {
