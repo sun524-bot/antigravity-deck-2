@@ -764,7 +764,13 @@ async function triggerCustomLaunch() {
 document.querySelectorAll('[data-launch]').forEach((btn) => {
   btn.addEventListener('click', () => {
     const app = btn.getAttribute('data-launch');
-    launchAppOnPC(app, app);
+    // If Win Search button clicked, pass whatever is typed in the search box
+    if (app === 'wins') {
+      const query = appSearchInput ? appSearchInput.value.trim() : '';
+      launchAppOnPC(query ? `wins:${query}` : 'wins', 'Win Search' + (query ? `: ${query}` : ''));
+    } else {
+      launchAppOnPC(app, app);
+    }
   });
 });
 
