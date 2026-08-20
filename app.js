@@ -573,6 +573,55 @@ async function sendTypedText() {
   }
 }
 
+// File / Photo Upload Handler
+const fileUploadInput = document.getElementById('file-upload-input');
+const btnAttachFile = document.getElementById('btn-attach-file');
+const btnTriggerUpload = document.getElementById('btn-trigger-upload');
+
+if (btnAttachFile && fileUploadInput) {
+  btnAttachFile.addEventListener('click', () => {
+    fileUploadInput.click();
+  });
+}
+
+if (btnTriggerUpload && fileUploadInput) {
+  btnTriggerUpload.addEventListener('click', () => {
+    fileUploadInput.click();
+  });
+}
+
+if (fileUploadInput) {
+  fileUploadInput.addEventListener('change', async () => {
+    const files = fileUploadInput.files;
+    if (!files || files.length === 0) return;
+
+    showToast(`📤 Sending ${files.length} file(s) to Desktop...`);
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('file', files[i]);
+    }
+
+    try {
+      const res = await fetch(getApiUrl('/api/upload'), {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        showToast(`✅ Saved ${data.files.length} file(s) to PC Desktop!`);
+        if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+        modalFiles.classList.add('hidden');
+      } else {
+        showToast(`⚠️ Upload failed: ${data.message}`, true);
+      }
+    } catch (err) {
+      showToast(`Upload error: ${err.message}`, true);
+    } finally {
+      fileUploadInput.value = '';
+    }
+  });
+}
+
 // Toggle Keyboard Bar
 document.getElementById('btn-toggle-keyboard').addEventListener('click', () => {
   typeInput.focus();

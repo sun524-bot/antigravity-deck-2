@@ -347,6 +347,68 @@ html, body {
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
 }
 
+.btn-attach {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 16px;
+  width: 40px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.btn-attach:active {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: var(--accent-cyan);
+  transform: scale(0.95);
+}
+
+.upload-dropzone {
+  background: rgba(56, 189, 248, 0.08);
+  border: 2px dashed rgba(56, 189, 248, 0.4);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  margin-bottom: 14px;
+  transition: all 0.2s ease;
+}
+
+.upload-dropzone:active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: var(--accent-cyan);
+  transform: scale(0.98);
+}
+
+.upload-dropzone .upload-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.upload-dropzone .upload-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.upload-dropzone .upload-info strong {
+  font-size: 13px;
+  color: var(--accent-cyan);
+}
+
+.upload-dropzone .upload-info span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 .btn-send {
   background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
   border: none;

@@ -103,6 +103,8 @@
 
     <!-- Text Typing Input Bar -->
     <div class="typing-bar" id="typing-bar">
+      <input type="file" id="file-upload-input" multiple style="display: none;">
+      <button class="btn-attach" id="btn-attach-file" title="Send Photo or File to PC Desktop">📎</button>
       <input type="text" id="type-input" placeholder="Type text to send to PC..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <button class="btn-send" id="btn-send-text">Send</button>
     </div>
@@ -253,6 +255,15 @@
       </div>
 
       <div class="drawer-body">
+        <!-- Upload from Phone Box -->
+        <div class="upload-dropzone" id="btn-trigger-upload">
+          <span class="upload-icon">📤</span>
+          <div class="upload-info">
+            <strong>Send File or Photo to PC Desktop</strong>
+            <span>Tap to select photos, videos, or documents</span>
+          </div>
+        </div>
+
         <!-- Search Input -->
         <div class="file-search-box">
           <input type="text" id="file-search-input" placeholder="Search files (e.g. report, .pdf, invoice, python)..." autocomplete="off">
