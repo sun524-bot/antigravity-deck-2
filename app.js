@@ -651,55 +651,80 @@ if (appSearchInput) {
   });
 }
 
-async function fetchInstalledApps(query) {
+let cachedInstalledApps = null;
+
+async function fetchInstalledApps(query = '') {
   if (!appsList) return;
-  appsList.innerHTML = '<div class="files-empty">Scanning installed PC software...</div>';
+  const q = query.trim().toLowerCase();
+
+  // If we already have cached apps and no query, render immediately
+  if (cachedInstalledApps && !q) {
+    renderAppsGrid(cachedInstalledApps);
+  } else if (!cachedInstalledApps) {
+    appsList.innerHTML = '<div class="files-empty">Scanning installed PC software...</div>';
+  }
+
   try {
-    const res = await fetch(getApiUrl(`/api/apps${query ? `?q=${encodeURIComponent(query)}` : ''}`));
+    const res = await fetch(getApiUrl(`/api/apps${q ? `?q=${encodeURIComponent(q)}` : ''}`));
     const data = await res.json();
     const apps = data.apps || [];
 
-    if (apps.length === 0) {
-      appsList.innerHTML = `<div class="files-empty">No applications found matching "${escapeHtml(query)}"</div>`;
-      return;
+    if (!q) {
+      cachedInstalledApps = apps;
     }
 
-    appsList.innerHTML = '';
-    apps.forEach((app) => {
-      const item = document.createElement('div');
-      item.className = 'app-item';
-      
-      let icon = app.icon || '🚀';
-      const nameLower = app.name.toLowerCase();
-      if (nameLower.includes('chrome') || nameLower.includes('edge') || nameLower.includes('browser')) icon = '🌐';
-      else if (nameLower.includes('vlc') || nameLower.includes('media player') || nameLower.includes('video') || nameLower.includes('movies')) icon = '🎬';
-      else if (nameLower.includes('wechat')) icon = '💬';
-      else if (nameLower.includes('whatsapp')) icon = '📱';
-      else if (nameLower.includes('telegram')) icon = '✈️';
-      else if (nameLower.includes('code') || nameLower.includes('studio') || nameLower.includes('python')) icon = '💻';
-      else if (nameLower.includes('terminal') || nameLower.includes('powershell') || nameLower.includes('cmd')) icon = '⬛';
-      else if (nameLower.includes('word') || nameLower.includes('writer')) icon = '📄';
-      else if (nameLower.includes('excel') || nameLower.includes('sheet') || nameLower.includes('calc')) icon = '📊';
-      else if (nameLower.includes('powerpoint') || nameLower.includes('slide')) icon = '📽️';
-      else if (nameLower.includes('bilibili') || nameLower.includes('哔哩哔哩')) icon = '📺';
-      else if (nameLower.includes('douyin') || nameLower.includes('抖音') || nameLower.includes('tiktok')) icon = '🎵';
-      else if (nameLower.includes('capcut') || nameLower.includes('剪映')) icon = '✂️';
-      else if (nameLower.includes('calc') || nameLower.includes('calculator')) icon = '🔢';
-      else if (nameLower.includes('notepad')) icon = '📝';
-      else if (nameLower.includes('paint')) icon = '🎨';
-      else if (nameLower.includes('winrar') || nameLower.includes('zip') || nameLower.includes('7-zip')) icon = '📦';
-
-      item.innerHTML = `
-        <div class="app-icon">${icon}</div>
-        <div class="app-name" title="${escapeHtml(app.name)}">${escapeHtml(app.name)}</div>
-      `;
-
-      item.addEventListener('click', () => launchAppOnPC(app.path, app.name));
-      appsList.appendChild(item);
-    });
+    renderAppsGrid(apps, q);
   } catch (err) {
-    appsList.innerHTML = `<div class="files-empty">⚠️ Failed to load apps: ${err.message}</div>`;
+    if (!cachedInstalledApps) {
+      appsList.innerHTML = `<div class="files-empty">⚠️ Failed to load apps: ${err.message}</div>`;
+    }
   }
+}
+
+function renderAppsGrid(apps, query = '') {
+  if (!appsList) return;
+  if (!apps || apps.length === 0) {
+    appsList.innerHTML = `<div class="files-empty">No applications found matching "${escapeHtml(query)}"</div>`;
+    return;
+  }
+
+  appsList.innerHTML = '';
+  apps.forEach((app) => {
+    const item = document.createElement('div');
+    item.className = 'app-item';
+    
+    let icon = app.icon || '🚀';
+    const nameLower = app.name.toLowerCase();
+    if (nameLower.includes('chrome') || nameLower.includes('edge') || nameLower.includes('browser')) icon = '🌐';
+    else if (nameLower.includes('vlc') || nameLower.includes('media player') || nameLower.includes('video') || nameLower.includes('movies') || nameLower.includes('potplayer')) icon = '🎬';
+    else if (nameLower.includes('wechat') || nameLower.includes('微信')) icon = '💬';
+    else if (nameLower.includes('whatsapp')) icon = '📱';
+    else if (nameLower.includes('telegram')) icon = '✈️';
+    else if (nameLower.includes('code') || nameLower.includes('studio') || nameLower.includes('python')) icon = '💻';
+    else if (nameLower.includes('terminal') || nameLower.includes('powershell') || nameLower.includes('cmd')) icon = '📟';
+    else if (nameLower.includes('word') || nameLower.includes('writer')) icon = '📄';
+    else if (nameLower.includes('excel') || nameLower.includes('sheet')) icon = '📊';
+    else if (nameLower.includes('powerpoint') || nameLower.includes('slide')) icon = '📽️';
+    else if (nameLower.includes('bilibili') || nameLower.includes('哔哩哔哩')) icon = '📺';
+    else if (nameLower.includes('douyin') || nameLower.includes('抖音') || nameLower.includes('tiktok')) icon = '🎵';
+    else if (nameLower.includes('capcut') || nameLower.includes('剪映')) icon = '✂️';
+    else if (nameLower.includes('calc') || nameLower.includes('calculator')) icon = '🔢';
+    else if (nameLower.includes('notepad')) icon = '📝';
+    else if (nameLower.includes('paint') || nameLower.includes('draw') || nameLower.includes('photoshop')) icon = '🎨';
+    else if (nameLower.includes('winrar') || nameLower.includes('zip') || nameLower.includes('7-zip')) icon = '📦';
+    else if (nameLower.includes('steam') || nameLower.includes('game')) icon = '🎮';
+
+    item.innerHTML = `
+      <div class="app-icon">${icon}</div>
+      <div class="app-name" title="${escapeHtml(app.name)}">${escapeHtml(app.name)}</div>
+    `;
+
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      launchAppOnPC(app.path, app.name);
+    });
+    appsList.appendChild(item);
+  });
 }
 
 async function launchAppOnPC(appPathOrName, displayName) {
@@ -993,5 +1018,13 @@ modalSettings.addEventListener('click', (e) => {
   if (e.target === modalSettings) modalSettings.classList.add('hidden');
 });
 
+// Stop touch events inside drawers from interfering with canvas
+document.querySelectorAll('.drawer-content').forEach((drawer) => {
+  drawer.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+  drawer.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
+  drawer.addEventListener('touchend', (e) => e.stopPropagation(), { passive: true });
+});
+
 // Initialize
 connectWebSockets();
+fetchInstalledApps(''); // Pre-fetch in background so apps render instantly when opened

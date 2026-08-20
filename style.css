@@ -444,8 +444,8 @@ html, body {
 
 .drawer-content {
   width: 100%;
-  max-width: 500px;
-  max-height: 80vh;
+  max-width: 620px;
+  max-height: 88vh;
   background: #0f172a;
   border: 1px solid var(--border-color);
   border-top-left-radius: var(--radius-lg);
@@ -455,6 +455,7 @@ html, body {
   overflow: hidden;
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.7);
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  touch-action: pan-y;
 }
 
 @keyframes slideUp {
@@ -466,8 +467,9 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .drawer-header h3 {
@@ -480,18 +482,25 @@ html, body {
   border: none;
   color: var(--text-secondary);
   font-size: 14px;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .drawer-body {
-  padding: 16px 20px calc(var(--safe-bottom) + 20px) 20px;
+  padding: 16px 20px calc(var(--safe-bottom) + 30px) 20px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  flex: 1;
 }
 
 .section-title {
@@ -821,10 +830,13 @@ html, body {
 
 .apps-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
   gap: 8px;
-  max-height: 40vh;
+  max-height: 42vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
   padding-right: 4px;
 }
 
@@ -832,7 +844,7 @@ html, body {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 10px 8px;
+  padding: 12px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -841,16 +853,17 @@ html, body {
   cursor: pointer;
   text-align: center;
   transition: all 0.15s ease;
+  min-height: 70px;
 }
 
 .app-item:active {
-  background: rgba(56, 189, 248, 0.2);
+  background: rgba(56, 189, 248, 0.25);
   border-color: var(--accent-cyan);
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 .app-item .app-icon {
-  font-size: 24px;
+  font-size: 26px;
 }
 
 .app-item .app-name {
@@ -863,6 +876,38 @@ html, body {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+/* Landscape Mode Adjustments */
+@media (orientation: landscape) and (max-height: 550px) {
+  .drawer-content {
+    max-height: 94vh;
+    max-width: 90vw;
+  }
+  .drawer-body {
+    max-height: 82vh;
+    padding: 10px 16px 30px 16px;
+    gap: 10px;
+  }
+  .grid-buttons {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+  }
+  .action-card {
+    padding: 8px 4px;
+    gap: 4px;
+  }
+  .card-icon {
+    font-size: 18px;
+  }
+  .card-label {
+    font-size: 10px;
+  }
+  .apps-list {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    max-height: 35vh;
+  }
 }
 
 /* Toast Message */
