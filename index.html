@@ -2,126 +2,355 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0a0d14">
-  <title>Antigravity Live Gateway</title>
-  <style>
-    :root {
-      --bg: #0a0d14;
-      --accent: #38bdf8;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      text-align: center;
-    }
-    .card {
-      background: rgba(18, 24, 38, 0.85);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      border-radius: 20px;
-      padding: 36px 28px;
-      max-width: 400px;
-      width: 100%;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-    .spinner {
-      width: 52px;
-      height: 52px;
-      border: 4px solid rgba(56, 189, 248, 0.15);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    h2 { font-size: 18px; font-weight: 700; color: var(--accent); }
-    p { font-size: 13px; color: var(--muted); line-height: 1.5; }
-    .btn {
-      background: linear-gradient(135deg, #38bdf8, #0284c7);
-      color: #fff;
-      border: none;
-      padding: 12px 24px;
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 12px;
-      cursor: pointer;
-      text-decoration: none;
-      margin-top: 10px;
-      display: inline-block;
-    }
-    .hidden { display: none; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0d1322">
+  <title>Antigravity Mobile Control Deck</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div class="card">
-    <div class="spinner" id="spinner"></div>
-    <h2>🚀 Antigravity Live Gateway</h2>
-    <p id="status-text">Resolving live active laptop tunnel...</p>
-    <a href="#" class="btn hidden" id="manual-btn">Open Control Deck</a>
+  <!-- Top Navigation Bar -->
+  <header class="top-bar">
+    <div class="brand">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="brand-title">Control Deck</span>
+      <span class="fps-badge" id="fps-badge">0 FPS</span>
+    </div>
+
+    <div class="top-actions">
+      <!-- Mode Toggle -->
+      <button class="icon-btn active" id="btn-mode-touch" title="Direct Touch">👆</button>
+      <button class="icon-btn" id="btn-mode-trackpad" title="Trackpad Mode">🖱️</button>
+
+      <!-- Zoom Preset -->
+      <div class="zoom-dropdown">
+        <button class="icon-btn" id="btn-zoom-toggle">🔍 <span id="zoom-label">Fit</span></button>
+        <div class="zoom-menu hidden" id="zoom-menu">
+          <button data-zoom="fit">Fit Screen</button>
+          <button data-zoom="1">100% (1:1)</button>
+          <button data-zoom="1.5">150%</button>
+          <button data-zoom="2">200%</button>
+          <button data-zoom="3">300%</button>
+        </div>
+      </div>
+
+      <!-- Open Windows / Task Switcher -->
+      <button class="icon-btn" id="btn-open-windows" title="Open Windows">🪟 Tasks</button>
+      <!-- File Search -->
+      <button class="icon-btn" id="btn-open-files" title="Search Files">📁 Files</button>
+      <!-- Quick Launchers -->
+      <button class="icon-btn" id="btn-open-launchers" title="Quick Launchers">🚀 Apps</button>
+      <!-- Virtual Keyboard -->
+      <button class="icon-btn" id="btn-toggle-keyboard" title="Keyboard Bar">⌨️</button>
+      <!-- Fullscreen Toggle -->
+      <button class="icon-btn" id="btn-toggle-fullscreen" title="Toggle Fullscreen">⛶</button>
+      <!-- Settings -->
+      <button class="icon-btn" id="btn-open-settings" title="Settings">⚙️</button>
+    </div>
+  </header>
+
+  <!-- Screen Viewport Container -->
+  <main class="viewport" id="viewport">
+    <div class="canvas-wrapper" id="canvas-wrapper">
+      <canvas id="screen-canvas"></canvas>
+      <div class="cursor-pointer hidden" id="cursor-pointer"></div>
+    </div>
+
+    <!-- Reconnect / Loading Banner -->
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="spinner"></div>
+      <p id="loading-text">Connecting to Antigravity Control Deck...</p>
+      <button class="btn-primary hidden" id="btn-reconnect">Reconnect</button>
+    </div>
+  </main>
+
+  <!-- Bottom Floating Control Area -->
+  <footer class="bottom-dock">
+    <!-- Trackpad Action Bar (Visible in Trackpad Mode) -->
+    <div class="trackpad-bar hidden" id="trackpad-bar">
+      <button class="pad-btn" id="btn-left-click">Left Click</button>
+      <button class="pad-btn" id="btn-middle-click">Middle</button>
+      <button class="pad-btn" id="btn-right-click">Right Click</button>
+      <button class="pad-btn" id="btn-drag-toggle">🖐️ Drag</button>
+    </div>
+
+    <!-- Quick Hotkeys Bar -->
+    <div class="hotkeys-bar" id="hotkeys-bar">
+      <div class="hotkeys-scroll">
+        <button class="key-chip" data-key="Escape">Esc</button>
+        <button class="key-chip" data-key="Tab">Tab</button>
+        <button class="key-chip" data-key="Win">⊞ Win</button>
+        <button class="key-chip" data-hotkey="win,s">🔍 Search</button>
+        <button class="key-chip" data-hotkey="win,r">⚡ Run</button>
+        <button class="key-chip" data-hotkey="ctrl,c">Ctrl+C</button>
+        <button class="key-chip" data-hotkey="ctrl,v">Ctrl+V</button>
+        <button class="key-chip" data-hotkey="ctrl,z">Ctrl+Z</button>
+        <button class="key-chip" data-hotkey="ctrl,a">Ctrl+A</button>
+        <button class="key-chip" data-hotkey="alt,tab">Alt+Tab</button>
+        <button class="key-chip" data-hotkey="win,d">Win+D</button>
+        <button class="key-chip" data-key="Enter">Enter</button>
+        <button class="key-chip" data-key="Backspace">⌫</button>
+        <button class="key-chip" data-key="ArrowUp">▲</button>
+        <button class="key-chip" data-key="ArrowDown">▼</button>
+        <button class="key-chip" data-key="ArrowLeft">◄</button>
+        <button class="key-chip" data-key="ArrowRight">►</button>
+        <button class="key-chip" data-key="F5">F5</button>
+      </div>
+    </div>
+
+    <!-- Text Typing Input Bar -->
+    <div class="typing-bar" id="typing-bar">
+      <input type="text" id="type-input" placeholder="Type text to send to PC..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <button class="btn-send" id="btn-send-text">Send</button>
+    </div>
+  </footer>
+
+  <!-- Quick Launchers Drawer / Modal -->
+  <div class="modal-backdrop hidden" id="modal-launchers">
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <h3>🚀 Quick Launchers & Apps</h3>
+        <button class="close-btn" id="btn-close-launchers">✕</button>
+      </div>
+
+        <!-- App Search Box -->
+        <div class="file-search-box" style="margin-bottom: 14px;">
+          <input type="text" id="app-search-input" placeholder="🔍 Search installed PC software (WeChat, VLC, Chrome, CapCut)..." autocomplete="off">
+        </div>
+
+        <div class="section-title">Installed Applications (1-Tap Launch)</div>
+        <div class="apps-list" id="apps-list">
+          <div class="files-empty">Loading installed software from PC...</div>
+        </div>
+
+        <!-- Custom Command / App Input -->
+        <div class="section-title" style="margin-top: 18px;">Custom Command / URL</div>
+        <div class="custom-launch-box">
+          <input type="text" id="custom-app-input" placeholder="Type custom command, URL, or path..." autocomplete="off">
+          <button class="btn-launch-go" id="btn-custom-launch">Run</button>
+        </div>
+
+        <div class="section-title">Windows System Shortcuts</div>
+        <div class="grid-buttons">
+          <button class="action-card" data-launch="wins">
+            <span class="card-icon">🔍</span>
+            <span class="card-label">Win Search</span>
+          </button>
+          <button class="action-card" data-launch="winr">
+            <span class="card-icon">⚡</span>
+            <span class="card-label">Run Dialog</span>
+          </button>
+          <button class="action-card" data-launch="win">
+            <span class="card-icon">🪟</span>
+            <span class="card-label">Start Menu</span>
+          </button>
+          <button class="action-card" data-launch="wintab">
+            <span class="card-icon">📋</span>
+            <span class="card-label">Task View</span>
+          </button>
+          <button class="action-card" data-launch="settings">
+            <span class="card-icon">⚙️</span>
+            <span class="card-label">Settings</span>
+          </button>
+          <button class="action-card" data-launch="alttab">
+            <span class="card-icon">🔄</span>
+            <span class="card-label">Alt + Tab</span>
+          </button>
+        </div>
+
+        <div class="section-title">Applications</div>
+        <div class="grid-buttons">
+          <button class="action-card" data-launch="antigravity">
+            <span class="card-icon">⚡</span>
+            <span class="card-label">Antigravity</span>
+          </button>
+          <button class="action-card" data-launch="vscode">
+            <span class="card-icon">💻</span>
+            <span class="card-label">VS Code</span>
+          </button>
+          <button class="action-card" data-launch="terminal">
+            <span class="card-icon">⬛</span>
+            <span class="card-label">PowerShell</span>
+          </button>
+          <button class="action-card" data-launch="cmd">
+            <span class="card-icon">🔲</span>
+            <span class="card-label">CMD</span>
+          </button>
+          <button class="action-card" data-launch="explorer">
+            <span class="card-icon">📁</span>
+            <span class="card-label">Explorer</span>
+          </button>
+          <button class="action-card" data-launch="browser">
+            <span class="card-icon">🌐</span>
+            <span class="card-label">Browser</span>
+          </button>
+          <button class="action-card" data-launch="taskmgr">
+            <span class="card-icon">📊</span>
+            <span class="card-label">Task Manager</span>
+          </button>
+          <button class="action-card" data-launch="notepad">
+            <span class="card-icon">📝</span>
+            <span class="card-label">Notepad</span>
+          </button>
+          <button class="action-card" data-launch="calc">
+            <span class="card-icon">🔢</span>
+            <span class="card-label">Calculator</span>
+          </button>
+        </div>
+
+        <div class="section-title">Media & Volume</div>
+        <div class="grid-buttons">
+          <button class="action-card" data-media="volume_up">
+            <span class="card-icon">🔊</span>
+            <span class="card-label">Vol +</span>
+          </button>
+          <button class="action-card" data-media="volume_down">
+            <span class="card-icon">🔉</span>
+            <span class="card-label">Vol -</span>
+          </button>
+          <button class="action-card" data-media="volume_mute">
+            <span class="card-icon">🔇</span>
+            <span class="card-label">Mute</span>
+          </button>
+          <button class="action-card" data-media="media_play_pause">
+            <span class="card-icon">⏯️</span>
+            <span class="card-label">Play / Pause</span>
+          </button>
+        </div>
+
+        <div class="section-title">System & Power</div>
+        <div class="grid-buttons">
+          <button class="action-card" data-power="lock">
+            <span class="card-icon">🔒</span>
+            <span class="card-label">Lock PC</span>
+          </button>
+          <button class="action-card" data-hotkey="win,d">
+            <span class="card-icon">🖥️</span>
+            <span class="card-label">Show Desktop</span>
+          </button>
+          <button class="action-card" data-power="sleep">
+            <span class="card-icon">💤</span>
+            <span class="card-label">Sleep</span>
+          </button>
+          <button class="action-card danger" data-power="restart">
+            <span class="card-icon">🔄</span>
+            <span class="card-label">Restart</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script>
-    const GIST_ID = '1e5db360ce0ae208bad1c26709c55462';
-    const params = new URLSearchParams(window.location.search);
-    const authToken = params.get('auth') || 'c85e4f126814fb14';
-    const statusText = document.getElementById('status-text');
-    const manualBtn = document.getElementById('manual-btn');
-    const spinner = document.getElementById('spinner');
+  <!-- File Search Drawer / Modal -->
+  <div class="modal-backdrop hidden" id="modal-files">
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <h3>📁 Search & Open Files on PC</h3>
+        <button class="close-btn" id="btn-close-files">✕</button>
+      </div>
 
-    async function resolveAndRedirect() {
-      try {
-        // Fetch secret Gist metadata with cache-busting
-        const gistApiUrl = `https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`;
-        const res = await fetch(gistApiUrl, { cache: 'no-store' });
-        
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        
-        // Find tunnel URL in tunnel.json or first file
-        let liveUrl = null;
-        if (data.files && data.files['tunnel.json']) {
-          const content = JSON.parse(data.files['tunnel.json'].content);
-          liveUrl = content.url;
-        } else if (data.files) {
-          const firstFile = Object.values(data.files)[0];
-          try {
-            const content = JSON.parse(firstFile.content);
-            liveUrl = content.url || firstFile.content.trim();
-          } catch {
-            liveUrl = firstFile.content.trim();
-          }
-        }
+      <div class="drawer-body">
+        <!-- Search Input -->
+        <div class="file-search-box">
+          <input type="text" id="file-search-input" placeholder="Search files (e.g. report, .pdf, invoice, python)..." autocomplete="off">
+        </div>
 
-        if (liveUrl) {
-          const target = `${liveUrl.replace(/\/$/, '')}/?auth=${encodeURIComponent(authToken)}`;
-          statusText.innerText = 'Connecting to live laptop tunnel...';
-          manualBtn.href = target;
-          manualBtn.classList.remove('hidden');
-          // Perform instant 302-style client redirect
-          window.location.replace(target);
-        } else {
-          throw new Error('No active tunnel URL found in Gist.');
-        }
-      } catch (err) {
-        spinner.classList.add('hidden');
-        statusText.innerText = `⚠️ Laptop is currently offline or tunnel is initializing. (${err.message})`;
-      }
-    }
+        <!-- Filter Chips -->
+        <div class="filter-chips">
+          <button class="chip-btn active" data-filter="">All</button>
+          <button class="chip-btn" data-filter="docs">📄 Documents</button>
+          <button class="chip-btn" data-filter="pdf">📕 PDFs</button>
+          <button class="chip-btn" data-filter="images">🖼️ Images</button>
+          <button class="chip-btn" data-filter="code">💻 Code</button>
+        </div>
 
-    resolveAndRedirect();
-  </script>
+        <!-- Results List -->
+        <div class="files-list" id="files-results">
+          <div class="files-empty">Type a search query above to find files on your PC</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Windows / Task Switcher Drawer / Modal -->
+  <div class="modal-backdrop hidden" id="modal-windows">
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <h3>🪟 Open Windows & Tasks</h3>
+        <button class="close-btn" id="btn-close-windows">✕</button>
+      </div>
+
+      <div class="drawer-body">
+        <!-- Quick Switcher Controls -->
+        <div class="window-shortcuts">
+          <button class="win-action-btn" data-hotkey="alt,tab">🔄 Alt + Tab</button>
+          <button class="win-action-btn" data-hotkey="win,d">🖥️ Show Desktop</button>
+          <button class="win-action-btn" data-hotkey="win,tab">📋 Task View</button>
+          <button class="win-action-btn" id="btn-refresh-windows">🔄 Refresh</button>
+        </div>
+
+        <div class="section-title">Active Desktop Windows</div>
+        <div class="windows-list" id="windows-list">
+          <div class="files-empty">Loading active windows...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Drawer / Modal -->
+  <div class="modal-backdrop hidden" id="modal-settings">
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <h3>⚙️ Stream Settings</h3>
+        <button class="close-btn" id="btn-close-settings">✕</button>
+      </div>
+
+      <div class="drawer-body">
+        <div class="setting-item">
+          <label>Stream Quality</label>
+          <select id="select-quality">
+            <option value="40">Low (Fastest)</option>
+            <option value="65" selected>Balanced (Recommended)</option>
+            <option value="85">High Quality</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <label>Target FPS</label>
+          <select id="select-fps">
+            <option value="10">10 FPS (Low Data)</option>
+            <option value="20" selected>20 FPS (Smooth)</option>
+            <option value="30">30 FPS (Ultra)</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <label>Touch Mode</label>
+          <select id="select-touch-mode">
+            <option value="direct">Direct Touch (Tap = Click at position)</option>
+            <option value="trackpad">Trackpad (Relative cursor movement)</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <label>Trackpad Sensitivity</label>
+          <input type="range" id="range-sensitivity" min="0.5" max="2.5" step="0.1" value="1.0">
+        </div>
+
+        <div class="setting-item">
+          <label>Host Info</label>
+          <div class="host-details" id="host-details">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
