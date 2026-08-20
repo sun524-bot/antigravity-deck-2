@@ -1,4 +1,4 @@
-const CACHE_NAME = 'control-deck-v7';
+const CACHE_NAME = 'control-deck-v9';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
