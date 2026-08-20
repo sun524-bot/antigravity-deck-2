@@ -63,6 +63,7 @@ const modalLaunchers = document.getElementById('modal-launchers');
 const customAppInput = document.getElementById('custom-app-input');
 const btnCustomLaunch = document.getElementById('btn-custom-launch');
 const appSearchInput = document.getElementById('app-search-input');
+const btnAppSearchGo = document.getElementById('btn-app-search-go');
 const appsList = document.getElementById('apps-list');
 
 const btnOpenWindows = document.getElementById('btn-open-windows');
@@ -640,9 +641,22 @@ modalLaunchers.addEventListener('click', (e) => {
   if (e.target === modalLaunchers) modalLaunchers.classList.add('hidden');
 });
 
-// App Search Debounce
 let appSearchDebounce = null;
+function triggerAppSearchWinS() {
+  const query = appSearchInput ? appSearchInput.value.trim() : '';
+  launchAppOnPC(query ? `wins:${query}` : 'wins', 'Win Search' + (query ? `: ${query}` : ''));
+}
+
+if (btnAppSearchGo) {
+  btnAppSearchGo.addEventListener('click', triggerAppSearchWinS);
+}
+
 if (appSearchInput) {
+  appSearchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      triggerAppSearchWinS();
+    }
+  });
   appSearchInput.addEventListener('input', () => {
     clearTimeout(appSearchDebounce);
     appSearchDebounce = setTimeout(() => {
