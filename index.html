@@ -119,9 +119,10 @@
       </div>
 
       <div class="drawer-body">
-        <!-- App Search Box -->
-        <div class="file-search-box" style="margin-bottom: 14px;">
-          <input type="text" id="app-search-input" placeholder="🔍 Search installed PC software (WeChat, VLC, Chrome, CapCut)..." autocomplete="off">
+        <!-- App Search Box with Search PC button -->
+        <div class="custom-launch-box" style="margin-bottom: 14px;">
+          <input type="text" id="app-search-input" placeholder="🔍 Search PC software or apps..." autocomplete="off">
+          <button class="btn-launch-go" id="btn-app-search-go" style="background: linear-gradient(135deg, #0078d4, #00b4d8); font-weight: 600;">Search</button>
         </div>
 
         <div class="section-title">Installed Applications (1-Tap Launch)</div>
@@ -363,6 +364,6 @@
   <!-- Toast Notification -->
   <div class="toast hidden" id="toast"></div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=2.2"></script>
 </body>
 </html>
